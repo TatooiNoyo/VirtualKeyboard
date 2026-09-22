@@ -133,7 +133,7 @@ namespace VirtualKeyboard
                 return;
             if (!IsShowButton())
                 return;
-            Vector2 screenPixels = Utility.ModifyCoordinatesForUIScale(e.Cursor.ScreenPixels);
+            Vector2 screenPixels = ModEntry.GetScreenPixels(e.Cursor);
 
             if (this.EditButton)
             {
@@ -221,17 +221,6 @@ namespace VirtualKeyboard
             }
         }
 
-        private Rectangle CalBoundFromUIScale(Rectangle bound)
-        {
-            Rectangle CalBound;
-            Vector2 UIScalePos = Utility.ModifyCoordinatesFromUIScale(new Vector2(bound.X, bound.Y));
-            CalBound.X = (int)UIScalePos.X;
-            CalBound.Y = (int)UIScalePos.Y;
-            CalBound.Height = (int)Utility.ModifyCoordinateFromUIScale(bound.Height);
-            CalBound.Width = (int)Utility.ModifyCoordinateFromUIScale(bound.Width);
-            return CalBound;
-        }
-
         public virtual void OnRenderedCloseButton(RenderedEventArgs e)
         {
             if (!this.EditButton)
@@ -239,8 +228,7 @@ namespace VirtualKeyboard
             Rectangle offsetCloseButtonBounds = this.CloseButtonBounds;
             offsetCloseButtonBounds.X += this.ModEntry.ToolbarOffset.X;
             offsetCloseButtonBounds.Y += this.ModEntry.ToolbarOffset.Y;
-            Rectangle UIScaleCloseButtonBoundsRectangle = CalBoundFromUIScale(offsetCloseButtonBounds);
-            e.SpriteBatch.Draw(Game1.mouseCursors, UIScaleCloseButtonBoundsRectangle, new Rectangle(337, 494, 12, 12), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 1E-06f);
+            e.SpriteBatch.Draw(Game1.mouseCursors, offsetCloseButtonBounds, new Rectangle(337, 494, 12, 12), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 1E-06f);
         }
 
         private void OnRendered(object? sender, RenderedEventArgs e)
@@ -254,15 +242,12 @@ namespace VirtualKeyboard
             Rectangle offsetOutterBounds = this.TextBounds;
             offsetOutterBounds.X += this.ModEntry.ToolbarOffset.X;
             offsetOutterBounds.Y += this.ModEntry.ToolbarOffset.Y;
-            Rectangle UIScaleOutterBoundsRectangle = CalBoundFromUIScale(offsetOutterBounds);
-            //e.SpriteBatch.Draw(Game1.menuTexture, UIScaleOutterBoundsRectangle, new Rectangle(0, 256, 60, 60), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 1E-06f);
-            OnRenderedDrawOutterBound(e, UIScaleOutterBoundsRectangle);
+            //e.SpriteBatch.Draw(Game1.menuTexture, offsetOutterBounds, new Rectangle(0, 256, 60, 60), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 1E-06f);
+            OnRenderedDrawOutterBound(e, offsetOutterBounds);
 
             //e.SpriteBatch.DrawString(Game1.smallFont, this.Alias, new Vector2(this.InnerBounds.X, this.InnerBounds.Y), Game1.textColor);
-            float UIScale = Utility.ModifyCoordinateFromUIScale(this.ButtonScale);
             Vector2 offsetInnerBounds = new Vector2(this.ModEntry.ToolbarOffset.X + this.TextBounds.X, this.ModEntry.ToolbarOffset.Y + this.TextBounds.Y);
-            Vector2 UIScaleInnerBounds = Utility.ModifyCoordinatesFromUIScale(offsetInnerBounds);
-            e.SpriteBatch.DrawString(Game1.smallFont, this.PaddingAlias, UIScaleInnerBounds, Game1.textColor, 0, new Vector2(0, 0), UIScale, SpriteEffects.None, 1E-06f);
+            e.SpriteBatch.DrawString(Game1.smallFont, this.PaddingAlias, offsetInnerBounds, Game1.textColor, 0, new Vector2(0, 0), this.ButtonScale, SpriteEffects.None, 1E-06f);
 
             OnRenderedCloseButton(e);
         }
@@ -307,7 +292,7 @@ namespace VirtualKeyboard
                 return;
             if (!this.SelectButton)
                 return;
-            Vector2 screenPixels = Utility.ModifyCoordinatesForUIScale(e.NewPosition.ScreenPixels);
+            Vector2 screenPixels = ModEntry.GetScreenPixels(e.NewPosition);
             this.TextBounds.X = (int)(screenPixels.X - MouseOffset.X);
             this.TextBounds.Y = (int)(screenPixels.Y - MouseOffset.Y);
             CalcBounds(this.TextBounds.X, this.TextBounds.Y);
@@ -315,7 +300,7 @@ namespace VirtualKeyboard
 
         private void OnRenderedDrawOutterBound(RenderedEventArgs e, Rectangle BoundsRectangle)
         {
-            int BorderSize = (int)Utility.ModifyCoordinateFromUIScale(PixelBorderSize);
+            int BorderSize = PixelBorderSize;
 
             Rectangle OuterBorderRect = new Rectangle(
                 BoundsRectangle.X - BorderSize,

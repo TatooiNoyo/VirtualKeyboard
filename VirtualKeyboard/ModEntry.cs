@@ -142,6 +142,13 @@ namespace VirtualKeyboard
                 controlButton.Hidden = isHide;
         }
 
+        internal static Vector2 GetScreenPixels(ICursorPosition cursor)
+        {
+            // SMAPI's screen position follows the gameplay zoom. The virtual keyboard is a
+            // fixed-size screen overlay, so restore physical screen pixels for input handling.
+            return cursor.ScreenPixels * Game1.options.zoomLevel;
+        }
+
         private void VirtualToggleButtonPressed(object? sender, ButtonPressedEventArgs e)
         {
             if (e.Button != SButton.MouseLeft)
@@ -153,7 +160,7 @@ namespace VirtualKeyboard
             if (EnableMenu && this.ModConfig.AboveMenu == 0)
                 return;
 
-            Vector2 screenPixels = Utility.ModifyCoordinatesForUIScale(e.Cursor.ScreenPixels);
+            Vector2 screenPixels = GetScreenPixels(e.Cursor);
             if (e.Button == this.ModConfig.vToggle.key || ShouldTrigger(VirtualToggleButtonBound, screenPixels))
             {
                 HideAllButtons(Convert.ToBoolean(this.EnabledStage));
@@ -311,17 +318,6 @@ namespace VirtualKeyboard
             }
         }
 
-        private Rectangle CalBoundFromUIScale(Rectangle bound)
-        {
-            Rectangle CalBound;
-            Vector2 UIScalePos = Utility.ModifyCoordinatesFromUIScale(new Vector2(bound.X, bound.Y));
-            CalBound.X = (int)UIScalePos.X;
-            CalBound.Y = (int)UIScalePos.Y;
-            CalBound.Height = (int)Utility.ModifyCoordinateFromUIScale(bound.Height);
-            CalBound.Width = (int)Utility.ModifyCoordinateFromUIScale(bound.Width);
-            return CalBound;
-        }
-
         /*********
         ** Private methods
         *********/
@@ -341,8 +337,8 @@ namespace VirtualKeyboard
 
             CalVirtualToggleButtonPosition();
 
-            this.VirtualToggleButton.bounds = CalBoundFromUIScale(VirtualToggleButtonBound);
-            this.VirtualToggleButton.scale = Utility.ModifyCoordinateFromUIScale(4.0f);
+            this.VirtualToggleButton.bounds = VirtualToggleButtonBound;
+            this.VirtualToggleButton.scale = 4.0f;
             this.VirtualToggleButton.baseScale = this.VirtualToggleButton.scale;
 
             float scale = 0.5f + this.EnabledStage * 0.5f;
